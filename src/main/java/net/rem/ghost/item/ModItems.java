@@ -2,7 +2,7 @@ package net.rem.ghost.item;
 
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.event.CreativeModeTabEvent;
+
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
@@ -10,8 +10,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.rem.ghost.Ghost;
 import net.rem.ghost.entity.ModEntities;
-import net.minecraftforge.common.ForgeSpawnEggItem;
-import net.minecraftforge.common.DeferredSpawnEggItem;
+
 
 
 @Mod.EventBusSubscriber(modid = Ghost.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -25,10 +24,8 @@ public class ModItems {
 
     @SubscribeEvent
     public static void addToCreativeTab(CreativeModeTabEvent.BuildContents event) {
-        if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
-            event.accept(GHOST_SPAWN_EGG);
+        if (event.getTab() == CreativeModeTabs.SPAWN_EGGS) {
+            event.accept(GHOST_SPAWN_EGG.get());
         }
     }
-}
-
 }

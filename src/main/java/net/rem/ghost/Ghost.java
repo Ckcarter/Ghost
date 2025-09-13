@@ -22,6 +22,5 @@ public class Ghost {
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
-        DeferredSpawnEggItem.initSpawnEggs();
-    }
+        event.enqueueWork(DeferredSpawnEggItem::initSpawnEggs);
 }
