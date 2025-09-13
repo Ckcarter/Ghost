@@ -24,6 +24,6 @@ public class GhostRenderer extends HumanoidMobRenderer<GhostEntity, ZombieModel<
 
     @Override
     protected RenderType getRenderType(GhostEntity entity, boolean showBody, boolean translucent, boolean outline) {
-        return RenderType.entityTranslucent(getTextureLocation(entity));
+        return RenderType.entityTranslucent(TEXTURE);
     }
 }

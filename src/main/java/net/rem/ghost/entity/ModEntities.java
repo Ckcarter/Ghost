@@ -11,7 +11,7 @@ import net.rem.ghost.Ghost;
 
 public class ModEntities {
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES =
-            DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, GHOST.MOD_ID);
+            DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, Ghost.MOD_ID);
 
     public static final RegistryObject<EntityType<GhostEntity>> GHOST = ENTITY_TYPES.register("ghost",
             () -> EntityType.Builder.of(GhostEntity::new, MobCategory.MONSTER)
