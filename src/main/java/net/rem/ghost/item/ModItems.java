@@ -10,6 +10,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.rem.ghost.Ghost;
 import net.rem.ghost.entity.ModEntities;
+import net.minecraftforge.common.DeferredSpawnEggItem;
+import net.minecraftforge.event.CreativeModeTabEvent;
 
 
 
