@@ -22,13 +22,10 @@ import net.minecraft.world.level.Level;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.Nullable;
 
 public class GhostEntity extends PathfinderMob implements MenuProvider {
-    private final SimpleContainer inventory = new SimpleContainer(27);
 
-    public SimpleContainer getInventory() {
-        return inventory;
-    }
 
 
     public GhostEntity(EntityType<? extends PathfinderMob> type, Level level) {
@@ -61,34 +58,16 @@ public class GhostEntity extends PathfinderMob implements MenuProvider {
         return Component.translatable("entity.ghost.ghost");
     }
 
-    @Override
-    public AbstractContainerMenu createMenu(int id, Inventory playerInventory, Player player) {
-        return ChestMenu.threeRows(id, playerInventory, this.inventory);
-    }
 
-    @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
-        NonNullList<ItemStack> list = NonNullList.withSize(inventory.getContainerSize(), ItemStack.EMPTY);
-        for (int i = 0; i < inventory.getContainerSize(); i++) {
-            list.set(i, inventory.getItem(i));
-        }
-        ContainerHelper.saveAllItems(tag, list);
-    }
-
-    @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        NonNullList<ItemStack> list = NonNullList.withSize(inventory.getContainerSize(), ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(tag, list);
-        for (int i = 0; i < list.size(); i++) {
-            inventory.setItem(i, list.get(i));
-        }
-    }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 20.0D)
                 .add(Attributes.ATTACK_DAMAGE, 0.0D);
+    }
+
+    @Override
+    public @Nullable AbstractContainerMenu createMenu(int pContainerId, Inventory pPlayerInventory, Player pPlayer) {
+        return null;
     }
 }
