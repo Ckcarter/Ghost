@@ -26,6 +26,11 @@ import net.minecraft.server.level.ServerPlayer;
 public class GhostEntity extends PathfinderMob implements MenuProvider {
     private final SimpleContainer inventory = new SimpleContainer(27);
 
+    public SimpleContainer getInventory() {
+        return inventory;
+    }
+
+
     public GhostEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
     }

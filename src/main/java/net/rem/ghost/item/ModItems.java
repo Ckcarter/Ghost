@@ -3,6 +3,7 @@ package net.rem.ghost.item;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
@@ -21,7 +22,7 @@ public class ModItems {
             DeferredRegister.create(ForgeRegistries.ITEMS, Ghost.MOD_ID);
 
     public static final RegistryObject<Item> GHOST_SPAWN_EGG = ITEMS.register("ghost_spawn_egg",
-            () -> new DeferredSpawnEggItem(ModEntities.GHOST, 0xFFFFFF, 0xAAAAFF,
+            () -> new SpawnEggItem(ModEntities.GHOST.get(), 0xFFFFFF, 0xAAAAFF,
                     new Item.Properties()));
 
     @SubscribeEvent
