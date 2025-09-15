@@ -74,9 +74,14 @@ public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityA
     public void setPlayerSkinProperty(Property property) {
         CompoundTag tag = new CompoundTag();
         if (property != null) {
-            tag.putString("Value", property.value());
-            if (property.signature() != null && !property.signature().isEmpty()) {
-                tag.putString("Signature", property.signature());
+            String value = property.value();
+            if (value != null && !value.isEmpty()) {
+                tag.putString("Value", value);
+            }
+
+            String signature = property.signature();
+            if (signature != null && !signature.isEmpty()) {
+                tag.putString("Signature", signature);
             }
         }
         this.entityData.set(PLAYER_SKIN, tag);
@@ -176,9 +181,10 @@ public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityA
         buffer.writeBoolean(uuid != null);
         if (uuid != null) {
             buffer.writeUUID(uuid);
-            CompoundTag skinTag = getPlayerSkinTag();
-            buffer.writeNbt(skinTag.isEmpty() ? null : skinTag.copy());
+
         }
+        CompoundTag skinTag = getPlayerSkinTag();
+        buffer.writeNbt(skinTag.isEmpty() ? null : skinTag.copy());
         buffer.writeUtf(getPlayerName());
     }
 
@@ -186,9 +192,12 @@ public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityA
     public void readSpawnData(FriendlyByteBuf additionalData) {
         if (additionalData.readBoolean()) {
             setPlayerUUID(additionalData.readUUID());
+        } else {
+            setPlayerUUID(null);
         }
-        setPlayerName(additionalData.readUtf(32767));
+
         setPlayerSkinTag(additionalData.readNbt());
+        setPlayerName(additionalData.readUtf(32767));
     }
 
     @Override
