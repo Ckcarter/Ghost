@@ -74,10 +74,10 @@ public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityA
     public void setPlayerSkinProperty(Property property) {
         CompoundTag tag = new CompoundTag();
         if (property != null) {
-//            tag.putString("Value", property.value());
-//            if (property.signature() != null && !property.signature().isEmpty()) {
-//                tag.putString("Signature", property.signature());
-//            }
+            tag.putString("Value", property.value());
+            if (property.signature() != null && !property.signature().isEmpty()) {
+                tag.putString("Signature", property.signature());
+            }
         }
         this.entityData.set(PLAYER_SKIN, tag);
     }
