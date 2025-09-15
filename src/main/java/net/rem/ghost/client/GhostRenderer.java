@@ -27,8 +27,11 @@ public class GhostRenderer extends HumanoidMobRenderer<GhostEntity, HumanoidMode
     @Override
     public ResourceLocation getTextureLocation(GhostEntity entity) {
         UUID uuid = entity.getPlayerUUID();
-        if (uuid != null) {
-            GameProfile profile = new GameProfile(uuid, "");
+        String name = entity.getPlayerName();
+        if (uuid != null && !name.isEmpty()) {
+            GameProfile profile = new GameProfile(uuid, name);
+            Minecraft.getInstance().getSkinManager().registerSkins(profile, (type, location, texture) -> {
+            }, true);
             return Minecraft.getInstance().getSkinManager().getInsecureSkinLocation(profile);
         }
         return DEFAULT_TEXTURE;

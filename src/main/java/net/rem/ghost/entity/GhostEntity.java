@@ -19,9 +19,8 @@ import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerPlayer;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
@@ -33,6 +32,9 @@ import java.util.UUID;
 public class GhostEntity extends PathfinderMob implements MenuProvider {
     private static final EntityDataAccessor<Optional<UUID>> PLAYER_UUID =
             SynchedEntityData.defineId(GhostEntity.class, EntityDataSerializers.OPTIONAL_UUID);
+    private static final EntityDataAccessor<String> PLAYER_NAME =
+            SynchedEntityData.defineId(GhostEntity.class, EntityDataSerializers.STRING);
+
 
 
     public GhostEntity(EntityType<? extends PathfinderMob> type, Level level) {
@@ -43,6 +45,7 @@ public class GhostEntity extends PathfinderMob implements MenuProvider {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(PLAYER_UUID, Optional.empty());
+        this.entityData.define(PLAYER_NAME, "");
     }
 
     public void setPlayerUUID(UUID uuid) {
@@ -54,12 +57,24 @@ public class GhostEntity extends PathfinderMob implements MenuProvider {
         return this.entityData.get(PLAYER_UUID).orElse(null);
     }
 
+    public void setPlayerName(String name) {
+        this.entityData.set(PLAYER_NAME, name == null ? "" : name);
+    }
+
+    public String getPlayerName() {
+        return this.entityData.get(PLAYER_NAME);
+    }
+
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         super.addAdditionalSaveData(tag);
         UUID uuid = getPlayerUUID();
         if (uuid != null) {
             tag.putUUID("PlayerUUID", uuid);
+        }
+        String name = getPlayerName();
+        if (!name.isEmpty()) {
+            tag.putString("PlayerName", name);
         }
     }
 
@@ -69,10 +84,10 @@ public class GhostEntity extends PathfinderMob implements MenuProvider {
         if (tag.hasUUID("PlayerUUID")) {
             setPlayerUUID(tag.getUUID("PlayerUUID"));
         }
+        if (tag.contains("PlayerName")) {
+            setPlayerName(tag.getString("PlayerName"));
+        }
     }
-
-
-
 
     @Override
     protected void registerGoals() {

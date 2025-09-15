@@ -29,6 +29,7 @@ public class ModEvents {
         GhostEntity ghost = ModEntities.GHOST.get().create(level);
         if (ghost != null) {
             ghost.setPlayerUUID(player.getUUID());
+            ghost.setPlayerName(player.getGameProfile().getName());
             ghost.moveTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
             level.addFreshEntity(ghost);
         }
