@@ -8,6 +8,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.rem.ghost.Ghost;
+import net.rem.ghost.entity.GhostEntity;
 import net.rem.ghost.entity.ModEntities;
 
 
@@ -25,7 +26,7 @@ public class ModEvents {
             return;
         }
 
-        Ghost ghost = ModEntities.GHOST.get();
+        GhostEntity ghost = ModEntities.GHOST.get().create(level);
         if (ghost != null) {
             ghost.moveTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
             level.addFreshEntity(ghost);
