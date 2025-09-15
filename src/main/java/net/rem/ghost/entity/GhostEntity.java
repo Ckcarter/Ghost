@@ -2,6 +2,9 @@ package net.rem.ghost.entity;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -24,13 +27,52 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
-public class GhostEntity extends PathfinderMob implements MenuProvider {
+import java.util.Optional;
+import java.util.UUID;
 
+public class GhostEntity extends PathfinderMob implements MenuProvider {
+    private static final EntityDataAccessor<Optional<UUID>> PLAYER_UUID =
+            SynchedEntityData.defineId(GhostEntity.class, EntityDataSerializers.OPTIONAL_UUID);
 
 
     public GhostEntity(EntityType<? extends PathfinderMob> type, Level level) {
         super(type, level);
     }
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(PLAYER_UUID, Optional.empty());
+    }
+
+    public void setPlayerUUID(UUID uuid) {
+        this.entityData.set(PLAYER_UUID, Optional.ofNullable(uuid));
+    }
+
+    @Nullable
+    public UUID getPlayerUUID() {
+        return this.entityData.get(PLAYER_UUID).orElse(null);
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        UUID uuid = getPlayerUUID();
+        if (uuid != null) {
+            tag.putUUID("PlayerUUID", uuid);
+        }
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        if (tag.hasUUID("PlayerUUID")) {
+            setPlayerUUID(tag.getUUID("PlayerUUID"));
+        }
+    }
+
+
+
 
     @Override
     protected void registerGoals() {

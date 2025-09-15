@@ -1,5 +1,7 @@
 package net.rem.ghost.client;
 
+import com.mojang.authlib.GameProfile;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.RenderType;
@@ -10,8 +12,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.rem.ghost.Ghost;
 import net.rem.ghost.entity.GhostEntity;
 
+import java.util.UUID;
+
 public class GhostRenderer extends HumanoidMobRenderer<GhostEntity, HumanoidModel<GhostEntity>> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(Ghost.MOD_ID, "textures/entity/ghost.png");
+    private static final ResourceLocation DEFAULT_TEXTURE = new ResourceLocation(Ghost.MOD_ID, "textures/entity/ghost.png");
 
     public GhostRenderer(EntityRendererProvider.Context context) {
         super(context, new HumanoidModel<>(context.bakeLayer(ModelLayers.ZOMBIE)), 0.0f);
@@ -19,7 +23,12 @@ public class GhostRenderer extends HumanoidMobRenderer<GhostEntity, HumanoidMode
 
     @Override
     public ResourceLocation getTextureLocation(GhostEntity entity) {
-        return TEXTURE;
+        UUID uuid = entity.getPlayerUUID();
+        if (uuid != null) {
+            GameProfile profile = new GameProfile(uuid, "");
+            return Minecraft.getInstance().getSkinManager().getInsecureSkinLocation(profile);
+        }
+        return DEFAULT_TEXTURE;
     }
 
     @Override
