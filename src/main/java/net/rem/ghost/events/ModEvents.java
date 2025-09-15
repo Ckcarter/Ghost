@@ -8,6 +8,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.rem.ghost.Ghost;
+import net.rem.ghost.entity.ModEntities;
 
 
 @Mod.EventBusSubscriber(modid = Ghost.MOD_ID)
@@ -24,10 +25,10 @@ public class ModEvents {
             return;
         }
 
-        Zombie zombie = EntityType.ZOMBIE.create(level);
-        if (zombie != null) {
-            zombie.moveTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
-            level.addFreshEntity(zombie);
+        Ghost ghost = ModEntities.GHOST.get();
+        if (ghost != null) {
+            ghost.moveTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
+            level.addFreshEntity(ghost);
         }
     }
 }
