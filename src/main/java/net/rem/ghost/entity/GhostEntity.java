@@ -163,6 +163,10 @@ public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityA
 
     @Override
     public Component getDisplayName() {
+        String name = getPlayerName();
+        if (!name.isEmpty()) {
+            return Component.translatable("entity.ghost.ghost.named", name);
+        }
         return Component.translatable("entity.ghost.ghost");
     }
 
