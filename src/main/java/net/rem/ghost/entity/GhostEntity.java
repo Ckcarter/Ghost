@@ -1,6 +1,7 @@
 package net.rem.ghost.entity;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -26,13 +27,14 @@ import net.minecraft.server.level.ServerPlayer;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.entity.IEntityAdditionalSpawnData;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public class GhostEntity extends PathfinderMob implements MenuProvider {
+public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityAdditionalSpawnData {
     private static final EntityDataAccessor<Optional<UUID>> PLAYER_UUID =
             SynchedEntityData.defineId(GhostEntity.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final EntityDataAccessor<String> PLAYER_NAME =
@@ -126,6 +128,25 @@ public class GhostEntity extends PathfinderMob implements MenuProvider {
                 .add(Attributes.ATTACK_DAMAGE, 0.0D);
     }
 
+
+    @Override
+    public void writeSpawnData(FriendlyByteBuf buffer) {
+        UUID uuid = getPlayerUUID();
+        buffer.writeBoolean(uuid != null);
+        if (uuid != null) {
+            buffer.writeUUID(uuid);
+        }
+        buffer.writeUtf(getPlayerName());
+    }
+
+    @Override
+    public void readSpawnData(FriendlyByteBuf additionalData) {
+        if (additionalData.readBoolean()) {
+            setPlayerUUID(additionalData.readUUID());
+        }
+        setPlayerName(additionalData.readUtf(32767));
+    }
+
     @Override
     public Packet<ClientGamePacketListener> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
@@ -138,4 +159,9 @@ public class GhostEntity extends PathfinderMob implements MenuProvider {
     public @Nullable AbstractContainerMenu createMenu(int pContainerId, Inventory pPlayerInventory, Player pPlayer) {
         return null;
     }
+
+//    @Override
+//    public void writeSpawnData(FriendlyByteBuf buffer) {
+//
+//    }
 }
