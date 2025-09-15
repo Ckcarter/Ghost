@@ -11,6 +11,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.resources.ResourceLocation;
+import com.mojang.authlib.properties.Property;
+import net.minecraft.client.resources.DefaultPlayerSkin;
 
 import net.rem.ghost.Ghost;
 import net.rem.ghost.entity.GhostEntity;
@@ -28,11 +30,33 @@ public class GhostRenderer extends HumanoidMobRenderer<GhostEntity, HumanoidMode
     public ResourceLocation getTextureLocation(GhostEntity entity) {
         UUID uuid = entity.getPlayerUUID();
         String name = entity.getPlayerName();
-        if (uuid != null && !name.isEmpty()) {
-            GameProfile profile = new GameProfile(uuid, name);
-            Minecraft.getInstance().getSkinManager().registerSkins(profile, (type, location, texture) -> {
-            }, true);
-            return Minecraft.getInstance().getSkinManager().getInsecureSkinLocation(profile);
+        Property skinProperty = entity.getPlayerSkinProperty();
+        GameProfile profile = null;
+
+        if (uuid != null && (skinProperty != null || !name.isEmpty())) {
+            profile = new GameProfile(uuid, name.isEmpty() ? null : name);
+        } else if (uuid == null && !name.isEmpty()) {
+            profile = new GameProfile(null, name);
+        }
+
+        if (profile != null) {
+            if (skinProperty != null) {
+                profile.getProperties().removeAll("textures");
+                profile.getProperties().put("textures", skinProperty);
+            }
+
+            boolean requireSecure = skinProperty == null;
+            var skinManager = Minecraft.getInstance().getSkinManager();
+            skinManager.registerSkins(profile, (type, location, texture) -> {
+            }, requireSecure);
+            ResourceLocation texture = skinManager.getInsecureSkinLocation(profile);
+            if (texture != null) {
+                return texture;
+            }
+        }
+
+        if (uuid != null) {
+            return DefaultPlayerSkin.getDefaultSkin(uuid);
         }
         return DEFAULT_TEXTURE;
     }

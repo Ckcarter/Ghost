@@ -2,16 +2,14 @@ package net.rem.ghost.events;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.monster.Zombie;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
+
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.rem.ghost.Ghost;
 import net.rem.ghost.entity.GhostEntity;
 import net.rem.ghost.entity.ModEntities;
+import com.mojang.authlib.properties.Property;
 
 
 @Mod.EventBusSubscriber(modid = Ghost.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
@@ -41,6 +39,13 @@ public class ModEvents {
             }
 
             ghost.setPlayerName(name);
+
+            var textures = player.getGameProfile().getProperties().get("textures");
+            if (!textures.isEmpty()) {
+                Property textureProperty = textures.iterator().next();
+                ghost.setPlayerSkinProperty(textureProperty);
+            }
+
 
             ghost.moveTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
             level.addFreshEntity(ghost);

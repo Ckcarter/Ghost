@@ -1,5 +1,6 @@
 package net.rem.ghost.entity;
 
+import com.mojang.authlib.properties.Property;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -25,8 +26,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.server.level.ServerPlayer;
 
-import net.minecraft.core.NonNullList;
-import net.minecraft.server.level.ServerPlayer;
+
 import net.minecraftforge.entity.IEntityAdditionalSpawnData;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
@@ -39,7 +39,8 @@ public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityA
             SynchedEntityData.defineId(GhostEntity.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final EntityDataAccessor<String> PLAYER_NAME =
             SynchedEntityData.defineId(GhostEntity.class, EntityDataSerializers.STRING);
-
+    private static final EntityDataAccessor<CompoundTag> PLAYER_SKIN =
+            SynchedEntityData.defineId(GhostEntity.class, EntityDataSerializers.COMPOUND_TAG);
 
 
     public GhostEntity(EntityType<? extends PathfinderMob> type, Level level) {
@@ -51,6 +52,7 @@ public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityA
         super.defineSynchedData();
         this.entityData.define(PLAYER_UUID, Optional.empty());
         this.entityData.define(PLAYER_NAME, "");
+        this.entityData.define(PLAYER_SKIN, new CompoundTag());
     }
 
     public void setPlayerUUID(UUID uuid) {
@@ -69,6 +71,36 @@ public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityA
     public String getPlayerName() {
         return this.entityData.get(PLAYER_NAME);
     }
+    public void setPlayerSkinProperty(Property property) {
+        CompoundTag tag = new CompoundTag();
+        if (property != null) {
+//            tag.putString("Value", property.value());
+//            if (property.signature() != null && !property.signature().isEmpty()) {
+//                tag.putString("Signature", property.signature());
+//            }
+        }
+        this.entityData.set(PLAYER_SKIN, tag);
+    }
+
+    public void setPlayerSkinTag(@Nullable CompoundTag tag) {
+        this.entityData.set(PLAYER_SKIN, tag == null ? new CompoundTag() : tag);
+    }
+
+    public CompoundTag getPlayerSkinTag() {
+        return this.entityData.get(PLAYER_SKIN);
+    }
+
+    @Nullable
+    public Property getPlayerSkinProperty() {
+        CompoundTag tag = getPlayerSkinTag();
+        if (tag.isEmpty() || !tag.contains("Value")) {
+            return null;
+        }
+        String value = tag.getString("Value");
+        String signature = tag.contains("Signature") ? tag.getString("Signature") : null;
+        return new Property("textures", value, signature);
+    }
+
 
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
@@ -81,6 +113,10 @@ public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityA
         if (!name.isEmpty()) {
             tag.putString("PlayerName", name);
         }
+        CompoundTag skinTag = getPlayerSkinTag();
+        if (!skinTag.isEmpty()) {
+            tag.put("PlayerSkin", skinTag.copy());
+        }
     }
 
     @Override
@@ -91,6 +127,11 @@ public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityA
         }
         if (tag.contains("PlayerName")) {
             setPlayerName(tag.getString("PlayerName"));
+        }
+        if (tag.contains("PlayerSkin", 10)) {
+            setPlayerSkinTag(tag.getCompound("PlayerSkin"));
+        } else {
+            setPlayerSkinTag(null);
         }
     }
 
@@ -135,6 +176,8 @@ public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityA
         buffer.writeBoolean(uuid != null);
         if (uuid != null) {
             buffer.writeUUID(uuid);
+            CompoundTag skinTag = getPlayerSkinTag();
+            buffer.writeNbt(skinTag.isEmpty() ? null : skinTag.copy());
         }
         buffer.writeUtf(getPlayerName());
     }
@@ -145,6 +188,7 @@ public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityA
             setPlayerUUID(additionalData.readUUID());
         }
         setPlayerName(additionalData.readUtf(32767));
+        setPlayerSkinTag(additionalData.readNbt());
     }
 
     @Override
