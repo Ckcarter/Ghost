@@ -20,7 +20,7 @@ public class ModEventBusEvent {
     public static void registerAttributes(EntityAttributeCreationEvent event) {
 
         //event.put(ModEntities.GHOST.get(), GhostEntity.createAttributes().build());
-
+        ModEntities.registerAttributes(event);
     }
 
 }
