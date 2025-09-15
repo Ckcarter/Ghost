@@ -160,8 +160,5 @@ public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityA
         return null;
     }
 
-//    @Override
-//    public void writeSpawnData(FriendlyByteBuf buffer) {
-//
-//    }
+
 }

@@ -14,7 +14,7 @@ import net.rem.ghost.entity.GhostEntity;
 import net.rem.ghost.entity.ModEntities;
 
 
-@Mod.EventBusSubscriber(modid = Ghost.MOD_ID)
+@Mod.EventBusSubscriber(modid = Ghost.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ModEvents {
 
     @SubscribeEvent
