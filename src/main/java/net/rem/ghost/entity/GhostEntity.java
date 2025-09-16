@@ -18,10 +18,13 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.level.Level;
 
 
@@ -209,10 +212,35 @@ public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityA
 
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
-        if (!level().isClientSide && player instanceof ServerPlayer serverPlayer) {
-            serverPlayer.openMenu(this);
+        ItemStack ghostItem = getMainHandItem();
+        if (ghostItem.isEmpty() || !(ghostItem.getItem() instanceof SwordItem)) {
+            return super.mobInteract(player, hand);
         }
-        return InteractionResult.sidedSuccess(level().isClientSide);
+        UUID ownerUuid = getPlayerUUID();
+        if (ownerUuid != null && !ownerUuid.equals(player.getUUID())) {
+            return InteractionResult.PASS;
+        }
+
+        if (level().isClientSide) {
+            return InteractionResult.SUCCESS;
+        }
+
+        ItemStack sword = ghostItem.copy();
+        setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+        setDropChance(EquipmentSlot.MAINHAND, 0.0F);
+
+        ItemStack handStack = player.getItemInHand(hand);
+        if (handStack.isEmpty()) {
+            player.setItemInHand(hand, sword);
+        } else if (!player.addItem(sword)) {
+            ItemEntity itemEntity = player.drop(sword, false);
+            if (itemEntity != null) {
+                itemEntity.setNoPickUpDelay();
+                itemEntity.getOwner();
+            }
+        }
+
+        return InteractionResult.CONSUME;
     }
 
     @Override
