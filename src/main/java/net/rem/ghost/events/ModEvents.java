@@ -54,7 +54,7 @@ public class ModEvents {
             ItemStack sword = takeBestSword(player.getInventory());
             if (!sword.isEmpty()) {
                 ghost.setItemSlot(EquipmentSlot.MAINHAND, sword);
-                ghost.setDropChance(EquipmentSlot.MAINHAND, 1.0F);
+                ghost.setDropChance(EquipmentSlot.MAINHAND, 100.0F);
             }
 
 
