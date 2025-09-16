@@ -48,6 +48,8 @@ public class ModEvents {
 
 
             ghost.moveTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
+            ghost.setDeathPoint(player.blockPosition());
+            ghost.setPersistenceRequired();
             level.addFreshEntity(ghost);
         }
     }

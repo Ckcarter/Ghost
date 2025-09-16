@@ -1,6 +1,7 @@
 package net.rem.ghost.entity;
 
 import com.mojang.authlib.properties.Property;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -11,10 +12,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.*;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
@@ -38,12 +36,19 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityAdditionalSpawnData {
+    private static final int DEFAULT_GUARD_RADIUS = 16;
     private static final EntityDataAccessor<Optional<UUID>> PLAYER_UUID =
             SynchedEntityData.defineId(GhostEntity.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final EntityDataAccessor<String> PLAYER_NAME =
             SynchedEntityData.defineId(GhostEntity.class, EntityDataSerializers.STRING);
     private static final EntityDataAccessor<CompoundTag> PLAYER_SKIN =
             SynchedEntityData.defineId(GhostEntity.class, EntityDataSerializers.COMPOUND_TAG);
+
+
+    @Nullable
+    private BlockPos deathPoint;
+    private int guardRadius = DEFAULT_GUARD_RADIUS;
+
 
 
     public GhostEntity(EntityType<? extends PathfinderMob> type, Level level) {
@@ -98,6 +103,30 @@ public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityA
         return this.entityData.get(PLAYER_SKIN);
     }
 
+    public void setDeathPoint(@Nullable BlockPos deathPoint) {
+        setDeathPoint(deathPoint, DEFAULT_GUARD_RADIUS);
+    }
+
+    public void setDeathPoint(@Nullable BlockPos deathPoint, int radius) {
+        this.deathPoint = deathPoint;
+        this.guardRadius = Math.max(1, radius);
+        if (deathPoint != null) {
+            this.restrictTo(deathPoint, this.guardRadius);
+        } else {
+            this.clearRestriction();
+        }
+    }
+
+    @Nullable
+    public BlockPos getDeathPoint() {
+        return deathPoint;
+    }
+
+    public int getGuardRadius() {
+        return guardRadius;
+    }
+
+
     @Nullable
     public Property getPlayerSkinProperty() {
         CompoundTag tag = getPlayerSkinTag();
@@ -125,6 +154,14 @@ public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityA
         if (!skinTag.isEmpty()) {
             tag.put("PlayerSkin", skinTag.copy());
         }
+        if (deathPoint != null) {
+            tag.putInt("DeathPointX", deathPoint.getX());
+            tag.putInt("DeathPointY", deathPoint.getY());
+            tag.putInt("DeathPointZ", deathPoint.getZ());
+            tag.putInt("GuardRadius", guardRadius);
+        }
+
+
     }
 
     @Override
@@ -141,17 +178,28 @@ public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityA
         } else {
             setPlayerSkinTag(null);
         }
+        if (tag.contains("DeathPointX", 99) && tag.contains("DeathPointY", 99) && tag.contains("DeathPointZ", 99)) {
+            int radius = tag.contains("GuardRadius", 99) ? tag.getInt("GuardRadius") : DEFAULT_GUARD_RADIUS;
+            setDeathPoint(new BlockPos(tag.getInt("DeathPointX"), tag.getInt("DeathPointY"), tag.getInt("DeathPointZ")), radius);
+        } else {
+            setDeathPoint(null);
+        }
+
+
     }
 
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new MeleeAttackGoal(this, 1.0D, true));
-        this.goalSelector.addGoal(2, new RandomStrollGoal(this, 0.6D));
-        this.goalSelector.addGoal(3, new LookAtPlayerGoal(this, Player.class, 8.0f));
-        this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
+        this.goalSelector.addGoal(2, new MoveTowardsRestrictionGoal(this, 1.0D));
+        this.goalSelector.addGoal(3, new RandomStrollGoal(this, 0.6D));
+        this.goalSelector.addGoal(4, new LookAtPlayerGoal(this, Player.class, 8.0f));
+        this.goalSelector.addGoal(5, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Monster.class, true));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Monster.class, 10, true, false,
+                this::isEntityWithinGuardRange));
     }
 
     @Override
@@ -182,7 +230,22 @@ public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityA
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 20.0D)
                 .add(Attributes.ATTACK_DAMAGE, 5.0D)
-                .add(Attributes.MOVEMENT_SPEED, 0.5D);
+                .add(Attributes.MOVEMENT_SPEED, 0.5D)
+                .add(Attributes.FOLLOW_RANGE, 32.0D);
+    }
+
+    private boolean isEntityWithinGuardRange(LivingEntity entity) {
+        return entity != null && isWithinGuardRange(entity.blockPosition());
+    }
+
+    private boolean isWithinGuardRange(BlockPos position) {
+        if (deathPoint == null) {
+            return true;
+        }
+        int dx = position.getX() - deathPoint.getX();
+        int dy = position.getY() - deathPoint.getY();
+        int dz = position.getZ() - deathPoint.getZ();
+        return dx * dx + dy * dy + dz * dz <= guardRadius * guardRadius;
     }
 
 

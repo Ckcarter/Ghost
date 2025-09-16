@@ -19,6 +19,7 @@
   },
   "minecraft:adventure/kill_all_mobs": {
     "criteria": {
+      "minecraft:skeleton": "2025-09-15 19:54:57 -0500",
       "minecraft:slime": "2025-09-15 18:52:26 -0500"
     },
     "done": false
@@ -44,6 +45,12 @@
   "minecraft:recipes/tools/lead": {
     "criteria": {
       "has_slime_ball": "2025-09-15 18:52:37 -0500"
+    },
+    "done": true
+  },
+  "minecraft:recipes/misc/bone_meal": {
+    "criteria": {
+      "has_bone": "2025-09-15 19:55:23 -0500"
     },
     "done": true
   },
