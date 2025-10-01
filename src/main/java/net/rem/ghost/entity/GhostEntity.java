@@ -39,7 +39,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityAdditionalSpawnData {
-    private static final int DEFAULT_GUARD_RADIUS = 16;
+    private static final int DEFAULT_GUARD_RADIUS = 10;
     private static final EntityDataAccessor<Optional<UUID>> PLAYER_UUID =
             SynchedEntityData.defineId(GhostEntity.class, EntityDataSerializers.OPTIONAL_UUID);
     private static final EntityDataAccessor<String> PLAYER_NAME =
@@ -239,7 +239,7 @@ public class GhostEntity extends PathfinderMob implements MenuProvider, IEntityA
                 itemEntity.getOwner();
             }
         }
-
+        discard();
         return InteractionResult.CONSUME;
     }
 
