@@ -13,12 +13,8 @@ import net.rem.ghost.entity.ModEntities;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.AxeItem;
-import net.minecraft.world.item.BowItem;
-import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 @Mod.EventBusSubscriber(modid = Ghost.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
@@ -34,10 +30,6 @@ public class ModEvents {
 //        if (level.isClientSide) {
 //            return;
 //        }
-        if (!hasWeapon(player.getInventory())) {
-            return;
-        }
-
         ServerLevel level = player.serverLevel();
 
         GhostEntity ghost = ModEntities.GHOST.get().create(level);
@@ -73,32 +65,6 @@ public class ModEvents {
             ghost.setPersistenceRequired();
             level.addFreshEntity(ghost);
         }
-    }
-
-    private static boolean hasWeapon(Inventory inventory) {
-        for (ItemStack stack : inventory.items) {
-            if (isWeapon(stack)) {
-                return true;
-            }
-        }
-
-        for (ItemStack stack : inventory.offhand) {
-            if (isWeapon(stack)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static boolean isWeapon(ItemStack stack) {
-        return !stack.isEmpty() && (
-                stack.getItem() instanceof SwordItem ||
-                stack.getItem() instanceof AxeItem ||
-                stack.getItem() instanceof BowItem ||
-                stack.getItem() instanceof CrossbowItem ||
-                stack.getItem() instanceof TridentItem
-        );
     }
 
     private static ItemStack takeBestSword(Inventory inventory) {
